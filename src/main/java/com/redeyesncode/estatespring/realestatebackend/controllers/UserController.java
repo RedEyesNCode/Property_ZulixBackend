@@ -32,4 +32,11 @@ public class UserController {
         return userService.loginUser(loginMap);
     }
 
+    @PostMapping("/check-username")
+    public ResponseEntity<?> checkUserName(@RequestBody HashMap<String,String> hashMap){
+
+        return userService.checkUsername(hashMap);
+
+    }
+
 }

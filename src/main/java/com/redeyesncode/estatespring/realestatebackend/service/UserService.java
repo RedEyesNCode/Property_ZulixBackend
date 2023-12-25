@@ -1,15 +1,19 @@
 package com.redeyesncode.estatespring.realestatebackend.service;
 
 
-import com.redeyesncode.estatespring.realestatebackend.models.CustomStatusCodeModel;
-import com.redeyesncode.estatespring.realestatebackend.models.StatusCodeModel;
-import com.redeyesncode.estatespring.realestatebackend.models.UserRegistrationDTO;
-import com.redeyesncode.estatespring.realestatebackend.models.UserTable;
+import com.redeyesncode.estatespring.realestatebackend.jwt.JwtSecretKey;
+import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
+import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 
 @Service
@@ -17,6 +21,9 @@ public class UserService {
 
     @Autowired
     private UserTableRepo userTableRepo;
+
+    private String jwtSecret = "springjwt";
+    private long jwtExpirationMs = 3600000; // 1 hour in milliseconds
 
     private static final ResponseEntity<?> SUCCESS_RESPONSE = ResponseEntity.ok(new StatusCodeModel("200",200,"Success"));
     private static final ResponseEntity<?> BAD_RESPONSE = ResponseEntity.badRequest().body(new StatusCodeModel("400",400,"Fail"));
@@ -73,11 +80,41 @@ public class UserService {
         String number = loginMap.get("telephoneNumber");
         UserTable checkUserLogin = userTableRepo.findByEmailAndTelephoneNumberAndPassword(mail,number,password);
         if(checkUserLogin!=null){
+            LoginJwtResponse loginJwtResponse = new LoginJwtResponse();
+            loginJwtResponse.setCode(200);
+            loginJwtResponse.setUser(checkUserLogin);
+            loginJwtResponse.setJWT(generateJwtToken(checkUserLogin.getEmail()));
+            loginJwtResponse.setMessage("Login Successfully ");
+            loginJwtResponse.setStatus("200 OK");
 
-            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Login  Success",checkUserLogin));
+            return ResponseEntity.ok(loginJwtResponse);
         }else {
             return BadResponseMessage("User not found !");
         }
+
+    }
+    private String generateJwtToken(String email) {
+        Date expirationDate = new Date(System.currentTimeMillis() + jwtExpirationMs);
+        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
+// Convert the key to a string (for storage, e.g., in application properties)
+        String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(expirationDate)
+                .signWith(SignatureAlgorithm.HS512, JwtSecretKey.getSecretKey())
+                .compact();
+    }
+
+    public ResponseEntity<?> checkUsername(HashMap<String, String> hashMap) {
+
+        if(userTableRepo.existsByUsername(hashMap.get("username"))){
+            return BadResponseMessage("Username already exists !");
+        }else {
+            return SuccessResponseMessage("Username available !");
+        }
+
 
     }
 }
