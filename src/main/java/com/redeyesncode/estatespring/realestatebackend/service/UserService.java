@@ -12,9 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -72,6 +74,46 @@ public class UserService {
 
 
     }
+    public ResponseEntity<?> updateUserProfile(UserUpdateDTO userDto) {
+        // Extract necessary information from DTO
+        int userId = userDto.getUserId(); // Assuming the DTO contains userId for identification
+        String fullName = userDto.getFullName();
+        String email = userDto.getEmail();
+        String telephoneNumber = userDto.getTelephoneNumber();
+        String postcode = userDto.getPostcode();
+        String password = userDto.getPassword();
+
+        // Perform validations or business logic here if needed
+
+        // Check if the user exists based on userId
+        Optional<UserTable> optionalUser = userTableRepo.findById((long) userId);
+        if (optionalUser.isPresent()) {
+            UserTable existingUser = optionalUser.get();
+
+            // Update user details
+            existingUser.setFullName(fullName);
+            existingUser.setEmail(email);
+            existingUser.setTelephoneNumber(telephoneNumber);
+            existingUser.setPostcode(postcode);
+            existingUser.setPassword(password);
+            existingUser.setUserName(userDto.getUserName());
+
+            // Update timestamps (if needed)
+            existingUser.setUpdatedAt(String.valueOf(LocalDateTime.now()));
+
+            // Save the updated user to the database
+            try {
+                UserTable updatedUser = userTableRepo.save(existingUser);
+                return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "User profile updated", updatedUser));
+            } catch (Exception e) {
+                return BadResponseMessage("Failed to update user profile");
+            }
+        } else {
+            return BadResponseMessage("User not found");
+        }
+    }
+
+
 
 
     public ResponseEntity<?> loginUser(HashMap<String, String> loginMap) {
@@ -114,7 +156,5 @@ public class UserService {
         }else {
             return SuccessResponseMessage("Username available !");
         }
-
-
     }
 }
