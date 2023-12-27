@@ -129,4 +129,10 @@ public class UserController {
 
     }
 
+    @PostMapping("/get-notifications")
+    public ResponseEntity<?> getNotifications(@RequestBody HashMap<String,String> userMap){
+        return userService.getNotificationsByReceiverId(userMap.get("userId"));
+
+    }
+
 }

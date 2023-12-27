@@ -1,9 +1,9 @@
 package com.redeyesncode.estatespring.realestatebackend.service;
 
-import com.redeyesncode.estatespring.realestatebackend.models.Notification;
-import com.redeyesncode.estatespring.realestatebackend.models.NotificationType;
-import com.redeyesncode.estatespring.realestatebackend.models.UserTable;
+import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
+import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
+import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,14 @@ public class NotificationService {
 
     @Autowired
     private NotificationRepo notificationRepository;
+
+    @Autowired
+    private UserTableRepo userTableRepo;
+
+    @Autowired
+    private UserListingRepo userListingRepo;
+
+
 
     // Private constructor to prevent instantiation
     private NotificationService() {
@@ -29,16 +37,28 @@ public class NotificationService {
     }
 
     // Method to insert a notification
-    public void insertNotification(UserTable sender, UserTable receiver, String title, String message, NotificationType type) {
+    public void insertNotification(NotificationDTO notificationDTO) {
         Notification notification = new Notification();
-        notification.setSender(sender);
-        notification.setReceiver(receiver);
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setNotificationType(type);
-        notification.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
 
-        notificationRepository.save(notification);
+        UserTable sender = userTableRepo.findById(Long.valueOf(notificationDTO.getSenderId())).orElse(null);
+        UserTable receiver = userTableRepo.findById(Long.valueOf(notificationDTO.getReceiverId())).orElse(null);
+        UserListing userListing = userListingRepo.findById(Long.valueOf(notificationDTO.getUserListingId())).orElse(null);
+
+        if (sender != null && receiver != null && userListing != null) {
+            notification.setSender(sender);
+            notification.setReceiver(receiver);
+            notification.setUserListing(userListing);
+            notification.setTitle(notificationDTO.getTitle());
+            notification.setMessage(notificationDTO.getMessage());
+            notification.setNotificationType(NotificationType.valueOf(notificationDTO.getNotificationType()));
+            notification.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
+
+            notificationRepository.save(notification);
+        } else {
+            // Handle scenarios where entities are not found
+            return;
+            // For example: throw an exception, log an error, or perform appropriate error handling
+        }
     }
 
     // Other methods for notification management, if needed

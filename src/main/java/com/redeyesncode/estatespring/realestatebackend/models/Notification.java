@@ -33,6 +33,9 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
+    @ManyToOne
+    @JoinColumn(name = "user_listing_id")
+    private UserListing userListing;
 
     @CreationTimestamp
     private String createdTimestamp;

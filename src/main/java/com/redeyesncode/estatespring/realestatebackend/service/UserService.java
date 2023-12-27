@@ -3,6 +3,7 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.jwt.JwtSecretKey;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
+import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,6 +23,10 @@ public class UserService {
 
     @Autowired
     private UserTableRepo userTableRepo;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
+
 
     private String jwtSecret = "springjwt";
     private long jwtExpirationMs = 3600000; // 1 hour in milliseconds
@@ -150,6 +155,30 @@ public class UserService {
 
 
 
+    }
+
+    public ResponseEntity<?> getNotificationsByReceiverId(String receiverId) {
+        try {
+            Long id = Long.valueOf(receiverId);
+            List<Notification> notifications = notificationRepo.findAll();
+            List<Notification> myNotifications = new ArrayList<>();
+            for (int i = 0; i < notifications.size(); i++) {
+                if(notifications.get(i).getReceiver().getUserId()==Integer.parseInt(receiverId)){
+                    myNotifications.add(notifications.get(i));
+                }
+
+            }
+
+            if (myNotifications.isEmpty()) {
+                return BadResponseMessage("No notifications found for receiver with ID " + id);
+            }
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Notifications fetched successfully", myNotifications));
+        } catch (NumberFormatException e) {
+            return BadResponseMessage("Invalid receiver ID format: " + receiverId);
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
     }
 
 
