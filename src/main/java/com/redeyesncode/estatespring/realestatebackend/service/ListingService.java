@@ -1,15 +1,17 @@
 package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.models.*;
-import com.redeyesncode.estatespring.realestatebackend.repository.PropertyDetailsRepo;
-import com.redeyesncode.estatespring.realestatebackend.repository.TourRequestRepository;
-import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
-import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
+import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
+import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.TourRequestDTO;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.UserListingDTO;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateListingDTO;
+import com.redeyesncode.estatespring.realestatebackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

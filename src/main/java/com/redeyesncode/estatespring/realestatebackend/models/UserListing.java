@@ -1,5 +1,6 @@
 package com.redeyesncode.estatespring.realestatebackend.models;
 
+import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
 import jakarta.persistence.*;
 import lombok.Data;
 

@@ -1,6 +1,7 @@
-package com.redeyesncode.estatespring.realestatebackend.models;
+package com.redeyesncode.estatespring.realestatebackend.models.common;
 
 
+import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
 import lombok.Getter;
 import lombok.Setter;
 

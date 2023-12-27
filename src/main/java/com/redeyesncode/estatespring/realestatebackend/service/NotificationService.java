@@ -1,6 +1,8 @@
 package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.models.*;
+import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.NotificationDTO;
 import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;

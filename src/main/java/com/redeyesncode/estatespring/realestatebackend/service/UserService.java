@@ -3,6 +3,12 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.jwt.JwtSecretKey;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
+import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.LoginJwtResponse;
+import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.ListingSearchCriteriaDTO;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.UserRegistrationDTO;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateDTO;
 import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import io.jsonwebtoken.Jwts;

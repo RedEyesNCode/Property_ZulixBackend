@@ -2,7 +2,7 @@ package com.redeyesncode.estatespring.realestatebackend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redeyesncode.estatespring.realestatebackend.jwt.JwtSecretKey;
-import com.redeyesncode.estatespring.realestatebackend.models.StatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -11,13 +11,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

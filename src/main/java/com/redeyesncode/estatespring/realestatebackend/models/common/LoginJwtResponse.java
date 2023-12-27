@@ -1,6 +1,7 @@
-package com.redeyesncode.estatespring.realestatebackend.models;
+package com.redeyesncode.estatespring.realestatebackend.models.common;
 
 
+import com.redeyesncode.estatespring.realestatebackend.models.UserTable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,7 @@
 package com.redeyesncode.estatespring.realestatebackend.models;
 
 
+import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

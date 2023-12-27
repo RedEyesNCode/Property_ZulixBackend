@@ -2,9 +2,8 @@ package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
-import com.redeyesncode.estatespring.realestatebackend.models.*;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
-import com.redeyesncode.estatespring.realestatebackend.service.NotificationService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -132,6 +131,11 @@ public class UserController {
     @PostMapping("/get-notifications")
     public ResponseEntity<?> getNotifications(@RequestBody HashMap<String,String> userMap){
         return userService.getNotificationsByReceiverId(userMap.get("userId"));
+
+    }
+    @PostMapping("/add-fav-listing")
+    public ResponseEntity<?> addFavListing(@RequestBody HashMap<String,String> map){
+        return ResponseEntity.ok("Continue from here ");
 
     }
 

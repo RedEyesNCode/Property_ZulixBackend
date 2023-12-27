@@ -1,5 +1,6 @@
-package com.redeyesncode.estatespring.realestatebackend.models;
+package com.redeyesncode.estatespring.realestatebackend.models.dto;
 
+import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
 import lombok.Data;
 
 @Data
