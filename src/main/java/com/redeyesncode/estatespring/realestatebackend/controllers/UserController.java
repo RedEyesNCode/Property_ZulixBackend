@@ -4,6 +4,7 @@ package com.redeyesncode.estatespring.realestatebackend.controllers;
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
+import com.redeyesncode.estatespring.realestatebackend.service.NotificationService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -95,7 +96,37 @@ public class UserController {
         return listingService.getListingsByStatus(listingStatus.get("listingStatus"),listingStatus.get("userId"));
     }
 
+    @PostMapping("/sub-admin/update-listing-status")
+    public ResponseEntity<?> updateListingStatus(@RequestBody HashMap<String,String> listingUpdateMap){
+
+        return listingService.updateListingStatusByListingId(listingUpdateMap.get("listingStatus"),listingUpdateMap.get("listingId"));
+    }
 
 
+    @PostMapping("/sub-admin/delete-listing")
+    public ResponseEntity<?> deleteListing(@RequestBody HashMap<String,String> listingUpdateMap){
+
+        return listingService.deleteListingByListingId(listingUpdateMap.get("listingId"));
+    }
+
+    @PostMapping("/submit-tour-request")
+    public ResponseEntity<?> submitTourRequest(@RequestBody TourRequestDTO tourRequestDTO){
+
+        return listingService.createTourRequest(tourRequestDTO);
+
+    }
+    @PostMapping("/get-my-tours")
+    public ResponseEntity<?> getMyTours(@RequestBody HashMap<String,String> userIdMap){
+
+        return listingService.fetchTourRequestsForUser(userIdMap.get("userId"));
+
+    }
+    @PostMapping("/update-tour-status")
+    public ResponseEntity<?> updateTourStatus(@RequestBody HashMap<String,String> updateTourStatus){
+
+
+        return listingService.updateTourRequestStatus(updateTourStatus.get("tourRequestId"),updateTourStatus.get("status"));
+
+    }
 
 }

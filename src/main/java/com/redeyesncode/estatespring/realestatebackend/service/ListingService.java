@@ -2,12 +2,14 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.repository.PropertyDetailsRepo;
+import com.redeyesncode.estatespring.realestatebackend.repository.TourRequestRepository;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +50,10 @@ public class ListingService {
 
     @Autowired
     private AddressRepo addressRepo;
+
+    @Autowired
+    private TourRequestRepository tourRequestRepository;
+
     private static final ResponseEntity<?> SUCCESS_RESPONSE = ResponseEntity.ok(new StatusCodeModel("200",200,"Success"));
     private static final ResponseEntity<?> BAD_RESPONSE = ResponseEntity.badRequest().body(new StatusCodeModel("400",400,"Fail"));
 
@@ -86,6 +92,118 @@ public class ListingService {
             }
 
             // Return the listings in the desired format
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> updateListingStatusByListingId(String listingStatus, String listingId) {
+        try {
+            UserListing.ListingStatus status = UserListing.ListingStatus.valueOf(listingStatus);
+            Long id = Long.valueOf(listingId);
+
+            UserListing listing = userListingRepo.findById(id).orElse(null);
+            if (listing == null) {
+                return BadResponseMessage("Listing with ID " + id + " not found !");
+            }
+
+            // Update the listing status
+            listing.setListingStatus(status);
+
+            // Save the updated listing
+            UserListing updatedListing = userListingRepo.save(listing);
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listing updated successfully", updatedListing));
+        } catch (IllegalArgumentException e) {
+            return BadResponseMessage("Invalid listing status provided: " + listingStatus);
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+    public ResponseEntity<?> deleteListingByListingId(String listingId) {
+        try {
+            Long id = Long.valueOf(listingId);
+
+            UserListing listing = userListingRepo.findById(id).orElse(null);
+            if (listing == null) {
+                return BadResponseMessage("Listing with ID " + id + " not found !");
+            }
+
+            // Delete the listing
+            userListingRepo.delete(listing);
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listing deleted successfully", null));
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+    public ResponseEntity<?> fetchTourRequestsForUser(String userId) {
+        try {
+            Long id = Long.valueOf(userId);
+            List<TourRequest> tourRequests = tourRequestRepository.findTourRequestsForUser(id);
+
+            if (tourRequests.isEmpty()) {
+                return BadResponseMessage("No tour requests found for user with ID " + id);
+            }
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Tour requests fetched successfully", tourRequests));
+        } catch (NumberFormatException e) {
+            return BadResponseMessage("Invalid user ID format: " + userId);
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> updateTourRequestStatus(String tourRequestId, String status) {
+        try {
+            Long id = Long.valueOf(tourRequestId);
+            TourRequest.TourRequestStatus tourRequestStatus = TourRequest.TourRequestStatus.valueOf(status);
+
+            TourRequest tourRequest = tourRequestRepository.findById(id).orElse(null);
+            if (tourRequest == null) {
+                return BadResponseMessage("Tour request with ID " + id + " not found !");
+            }
+
+            tourRequest.setStatus(tourRequestStatus);
+            TourRequest updatedTourRequest = tourRequestRepository.save(tourRequest);
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Tour request status updated successfully", updatedTourRequest));
+        } catch (NumberFormatException e) {
+            return BadResponseMessage("Invalid tour request ID format: " + tourRequestId);
+        } catch (IllegalArgumentException e) {
+            return BadResponseMessage("Invalid status provided: " + status);
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> createTourRequest(TourRequestDTO tourRequestDTO) {
+        try {
+            Long userListingId = Long.valueOf(tourRequestDTO.getListingId());
+            Long userId = Long.valueOf(tourRequestDTO.getRequesterId());
+
+            UserListing userListing = userListingRepo.findById(userListingId).orElse(null);
+            UserTable requester = userTableRepo.findById(userId).orElse(null);
+
+            if (userListing == null) {
+                return BadResponseMessage("User listing with ID " + userListingId + " not found !");
+            }
+
+            if (requester == null) {
+                return BadResponseMessage("Requester with ID " + userId + " not found !");
+            }
+
+            TourRequest tourRequest = new TourRequest();
+            tourRequest.setTourDateTime(tourRequestDTO.getTourDateTime());
+            tourRequest.setRequesterName(tourRequestDTO.getRequesterName());
+            tourRequest.setRequesterPhoneNumber(tourRequestDTO.getRequesterPhoneNumber());
+            tourRequest.setUserListing(userListing);
+            tourRequest.setRequester(requester);
+            tourRequest.setStatus(TourRequest.TourRequestStatus.EMPTY);
+
+            TourRequest createdTourRequest = tourRequestRepository.save(tourRequest);
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Tour request created successfully", createdTourRequest));
         } catch (Exception e) {
             return BadResponseMessage(e.getMessage());
         }
