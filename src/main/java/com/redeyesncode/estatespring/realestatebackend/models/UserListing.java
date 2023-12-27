@@ -24,6 +24,18 @@ public class UserListing {
     @OneToOne(cascade = CascadeType.ALL)
     private PropertyDetails property;
 
+    @Enumerated(EnumType.STRING)
+    private ListingStatus listingStatus = ListingStatus.REVIEWING;
+
+    private String deniedReason = "";
     // Constructors, getters, setters, etc.
+    public enum ListingStatus {
+        ACTIVE,
+        INACTIVE,
+        REVIEWING,
+        DENIED,
+        EMPTY // Optional: For default or initial value handling
+    }
+
 }
 

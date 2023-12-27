@@ -73,6 +73,24 @@ public class ListingService {
 
 
     }
+    public ResponseEntity<?> getListingsByStatus(String listingStatus,String userId) {
+        try {
+            // Fetch listings based on the provided status string
+            UserListing.ListingStatus status = UserListing.ListingStatus.valueOf(listingStatus);
+            List<UserListing> listings = userListingRepo.findByListingStatusAndUserId(status, Long.valueOf(userId));
+            if(listings.isEmpty()){
+                return BadResponseMessage("No Listings Found !");
+            }else{
+                return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listings fetched successfully", listings));
+
+            }
+
+            // Return the listings in the desired format
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+
     public ResponseEntity<?> addUserListing(UserListingDTO newListingDTO) {
         Long userId = newListingDTO.getUserId();
         ListingType listingType = newListingDTO.getListingType();
@@ -102,6 +120,8 @@ public class ListingService {
             newUserListing.setUser(user);
             newUserListing.setListingType(listingType);
             newUserListing.setAddress(address);
+            newUserListing.setListingStatus(UserListing.ListingStatus.REVIEWING);
+            newUserListing.setDeniedReason("");
 
             // Save the new user listing to the database
             try {

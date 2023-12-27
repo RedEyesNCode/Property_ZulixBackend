@@ -1,15 +1,14 @@
 package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 
+import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 
@@ -21,6 +20,10 @@ public class UserController {
 
     @Autowired
     private ListingService listingService;
+
+    @Autowired
+    private StorageService storageService;
+
 
 
     @PostMapping("/register-user")
@@ -73,5 +76,26 @@ public class UserController {
 
         return listingService.addPropertyDetailsToUserListing(detailsDTO.getUserListingId(), detailsDTO.getPropertyDetails());
     }
+
+    @PostMapping("/upload-file")
+    public ResponseEntity<?> uploadFile(@RequestParam("image_file") MultipartFile file){
+
+        return storageService.uploadFile(file);
+
+
+    }
+
+    @PostMapping("/search-feed")
+    public ResponseEntity<?> searchFeed(@RequestBody ListingSearchCriteriaDTO criteriaDTO){
+        return userService.searchFeed(criteriaDTO);
+    }
+
+    @PostMapping("/get-listing-status")
+    public ResponseEntity<?> searchFeed(@RequestBody HashMap<String,String> listingStatus){
+        return listingService.getListingsByStatus(listingStatus.get("listingStatus"),listingStatus.get("userId"));
+    }
+
+
+
 
 }

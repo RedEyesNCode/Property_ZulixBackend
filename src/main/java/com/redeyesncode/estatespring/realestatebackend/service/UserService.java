@@ -7,16 +7,15 @@ import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -26,6 +25,75 @@ public class UserService {
 
     private String jwtSecret = "springjwt";
     private long jwtExpirationMs = 3600000; // 1 hour in milliseconds
+
+    @Autowired
+    private EntityManager entityManager;
+
+    public  List<UserListing> searchListingsByCriteria(ListingSearchCriteriaDTO criteria) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT ul FROM UserListing ul WHERE 1=1");
+
+        if (criteria.getListingType() != null ) {
+            queryBuilder.append(" AND ul.listingType = :listingType");
+        }
+        if (criteria.getPostalCode() != null && !criteria.getPostalCode().isEmpty()) {
+            queryBuilder.append(" AND ul.address.postalCode = :postalCode");
+        }
+        if (criteria.getCity() != null && !criteria.getCity().isEmpty()) {
+            queryBuilder.append(" AND ul.address.city = :city");
+        }
+        if (criteria.getTown() != null && !criteria.getTown().isEmpty()) {
+            queryBuilder.append(" AND ul.address.town = :town");
+        }
+        if (criteria.getNumberOfBedrooms() != null) {
+            queryBuilder.append(" AND ul.propertyDetails.numberOfBedrooms = :numberOfBedrooms");
+        }
+        if (criteria.getNumberOfBathrooms() != null) {
+            queryBuilder.append(" AND ul.propertyDetails.numberOfBathrooms = :numberOfBathrooms");
+        }
+        if (criteria.getNumberOfKitchens() != null) {
+            queryBuilder.append(" AND ul.propertyDetails.numberOfKitchens = :numberOfKitchens");
+        }
+        if (criteria.getMinPrice() != null) {
+            queryBuilder.append(" AND ul.propertyDetails.price >= :minPrice");
+        }
+        if (criteria.getMaxPrice() != null) {
+            queryBuilder.append(" AND ul.propertyDetails.price <= :maxPrice");
+        }
+
+        Query query = entityManager.createQuery(queryBuilder.toString(), UserListing.class);
+
+        if (criteria.getListingType() != null) {
+            query.setParameter("listingType", criteria.getListingType());
+        }
+        if (criteria.getPostalCode() != null && !criteria.getPostalCode().isEmpty()) {
+            query.setParameter("postalCode", criteria.getPostalCode());
+        }
+        if (criteria.getCity() != null && !criteria.getCity().isEmpty()) {
+            query.setParameter("city", criteria.getCity());
+        }
+        if (criteria.getTown() != null && !criteria.getTown().isEmpty()) {
+            query.setParameter("town", criteria.getTown());
+        }
+        if (criteria.getNumberOfBedrooms() != null) {
+            query.setParameter("numberOfBedrooms", criteria.getNumberOfBedrooms());
+        }
+        if (criteria.getNumberOfBathrooms() != null) {
+            query.setParameter("numberOfBathrooms", criteria.getNumberOfBathrooms());
+        }
+        if (criteria.getNumberOfKitchens() != null) {
+            query.setParameter("numberOfKitchens", criteria.getNumberOfKitchens());
+        }
+        if (criteria.getMinPrice() != null) {
+            query.setParameter("minPrice", criteria.getMinPrice());
+        }
+        if (criteria.getMaxPrice() != null) {
+            query.setParameter("maxPrice", criteria.getMaxPrice());
+        }
+
+        return query.getResultList();
+    }
+
+
 
     private static final ResponseEntity<?> SUCCESS_RESPONSE = ResponseEntity.ok(new StatusCodeModel("200",200,"Success"));
     private static final ResponseEntity<?> BAD_RESPONSE = ResponseEntity.badRequest().body(new StatusCodeModel("400",400,"Fail"));
@@ -40,7 +108,16 @@ public class UserService {
         return ResponseEntity.ok(new StatusCodeModel("200",200,message));
 
     }
+    public  ResponseEntity<?> searchFeed(ListingSearchCriteriaDTO criteriaDTO){
+        List<UserListing> userListingList = searchListingsByCriteria(criteriaDTO);
 
+        if(userListingList.isEmpty()){
+            return BadResponseMessage("Unable to fetch feed !");
+        }else{
+            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Feed !",userListingList));
+
+        }
+    }
     public ResponseEntity<?> registerUser(UserRegistrationDTO userDto) {
         // Extract necessary information from DTO
 
@@ -74,6 +151,8 @@ public class UserService {
 
 
     }
+
+
     public ResponseEntity<?> updateUserProfile(UserUpdateDTO userDto) {
         // Extract necessary information from DTO
         int userId = userDto.getUserId(); // Assuming the DTO contains userId for identification
