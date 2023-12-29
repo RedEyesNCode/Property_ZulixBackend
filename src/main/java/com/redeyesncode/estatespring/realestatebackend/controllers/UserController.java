@@ -3,6 +3,7 @@ package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
+import com.redeyesncode.estatespring.realestatebackend.service.FavoritesService;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ public class UserController {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private FavoritesService favoritesService;
+
 
 
 
@@ -135,7 +140,35 @@ public class UserController {
     }
     @PostMapping("/add-fav-listing")
     public ResponseEntity<?> addFavListing(@RequestBody HashMap<String,String> map){
-        return ResponseEntity.ok("Continue from here ");
+        return favoritesService.addtoFavorites(map.get("userId"),map.get("listingId"));
+
+    }
+
+    @PostMapping("/get-fav-listing")
+    public ResponseEntity<?> getFavListing(@RequestBody HashMap<String,String> map){
+        return favoritesService.getFavoritesByUserId(map.get("userId"));
+    }
+
+    @PostMapping("/remove-fav-listing")
+    public ResponseEntity<?> removeFavListing(@RequestBody HashMap<String,String> map){
+        return favoritesService.updateFavoriteStatus(map.get("favoriteId"),map.get("status"));
+
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser(@RequestBody HashMap<String,String> map){
+        return userService.deleteUser(map.get("userId"));
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody HashMap<String,String> map){
+        return userService.changePassword(map);
+
+    }
+
+    @PostMapping("/change-email-address")
+    public ResponseEntity<?> changeEmailAddress(@RequestBody HashMap<String,String> map){
+        return userService.changeEmailAddress(map);
 
     }
 

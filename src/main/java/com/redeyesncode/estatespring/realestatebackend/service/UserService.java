@@ -10,12 +10,14 @@ import com.redeyesncode.estatespring.realestatebackend.models.dto.ListingSearchC
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserRegistrationDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateDTO;
 import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
+import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,10 @@ public class UserService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private UserListingRepo userListingRepo;
+
 
     public  List<UserListing> searchListingsByCriteria(ListingSearchCriteriaDTO criteria) {
         StringBuilder queryBuilder = new StringBuilder("SELECT ul FROM UserListing ul WHERE 1=1");
@@ -270,5 +276,68 @@ public class UserService {
         }else {
             return SuccessResponseMessage("Username available !");
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteUser(String userId) {
+
+        if(userTableRepo.existsById(Long.valueOf(userId))){
+            userListingRepo.deleteAllByUserId(Long.valueOf(userId));
+            userTableRepo.deleteById(Long.valueOf(userId));
+
+            return SuccessResponseMessage("User Deleted successfully");
+        }else {
+            return BadResponseMessage("User Not Found !");
+        }
+
+    }
+    public ResponseEntity<?> changePassword(HashMap<String,String> passwordMap){
+        Optional<UserTable> userTable = userTableRepo.findById(Long.valueOf(passwordMap.get("userId")));
+        if(userTable.isPresent()){
+            String currentPassword = passwordMap.get("currentPassword");
+            String newPassword = passwordMap.get("newPassword");
+            String confirmNewPassword = passwordMap.get("confirmPassword");
+            if(userTable.get().getPassword().equals(currentPassword)){
+                if(newPassword.equals(confirmNewPassword)){
+                    userTable.get().setPassword(newPassword);
+                    return SuccessResponseMessage("Password updated !");
+
+
+                }else{
+                    return BadResponseMessage("Password does not match !");
+
+                }
+
+            }else {
+                return BadResponseMessage("Password does not match !");
+            }
+
+        }else {
+            return BadResponseMessage("User not found !");
+
+        }
+
+
+
+    }
+    public ResponseEntity<?> changeEmailAddress(HashMap<String,String> changeEmailAddressMap){
+        Optional<UserTable> userTable = userTableRepo.findById(Long.valueOf(changeEmailAddressMap.get("userId")));
+        if(userTable.isPresent()){
+            String currentEmailAddress = changeEmailAddressMap.get("currentEmail");
+            if(currentEmailAddress.equals(userTable.get().getEmail())){
+                String newEmailAddress = changeEmailAddressMap.get("newEmail");
+                UserTable userTable1 = userTable.get();
+                userTable1.setEmail(newEmailAddress);
+                userTableRepo.save(userTable1);
+                return SuccessResponseMessage("Email Address Updated !");
+
+            }else {
+                return BadResponseMessage("Email does not match !");
+            }
+
+        }else {
+            return BadResponseMessage("User Not Found !");
+        }
+
     }
 }

@@ -18,11 +18,11 @@ public class UserListing {
     @Enumerated(EnumType.STRING)
     private ListingType listingType;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.REMOVE)
     private PropertyDetails property;
 
     @Enumerated(EnumType.STRING)
