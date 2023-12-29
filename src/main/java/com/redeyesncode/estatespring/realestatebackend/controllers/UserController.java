@@ -5,6 +5,7 @@ import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
 import com.redeyesncode.estatespring.realestatebackend.service.FavoritesService;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
+import com.redeyesncode.estatespring.realestatebackend.service.NotificationService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,7 @@ public class UserController {
 
     }
 
+
     @PostMapping("/add-listing-property")
     public ResponseEntity<?> addListingProperty(@RequestBody AddPropertyDetailsDTO detailsDTO){
 
@@ -107,7 +109,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/sub-admin/delete-listing")
+    @DeleteMapping("/sub-admin/delete-listing")
     public ResponseEntity<?> deleteListing(@RequestBody HashMap<String,String> listingUpdateMap){
 
         return listingService.deleteListingByListingId(listingUpdateMap.get("listingId"));
@@ -157,7 +159,7 @@ public class UserController {
 
     @DeleteMapping("/delete-user")
     public ResponseEntity<?> deleteUser(@RequestBody HashMap<String,String> map){
-        return userService.deleteUser(map.get("userId"));
+        return userService.deleteUser(map);
     }
 
     @PostMapping("/update-password")
@@ -169,6 +171,12 @@ public class UserController {
     @PostMapping("/change-email-address")
     public ResponseEntity<?> changeEmailAddress(@RequestBody HashMap<String,String> map){
         return userService.changeEmailAddress(map);
+
+    }
+
+    @PostMapping("/get-dashboard-count")
+    public ResponseEntity<?> getDashboardCount(@RequestBody HashMap<String,String> map){
+        return userService.getDashboardCount(map);
 
     }
 

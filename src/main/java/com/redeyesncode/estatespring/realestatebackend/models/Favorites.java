@@ -13,7 +13,7 @@ public class Favorites {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id")
     private UserTable user;
 

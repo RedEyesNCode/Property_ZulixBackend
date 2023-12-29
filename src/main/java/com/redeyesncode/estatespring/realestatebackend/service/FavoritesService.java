@@ -3,9 +3,12 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.redeyesncode.estatespring.realestatebackend.models.Favorites;
+import com.redeyesncode.estatespring.realestatebackend.models.Notification;
 import com.redeyesncode.estatespring.realestatebackend.models.UserListing;
 import com.redeyesncode.estatespring.realestatebackend.models.UserTable;
 import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.NotificationDTO;
 import com.redeyesncode.estatespring.realestatebackend.repository.FavoritesRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
@@ -40,14 +43,26 @@ public class FavoritesService {
                 UserTable user = userOptional.get();
                 UserListing listing = listingOptional.get();
 
+//                String notificationReceiverId = String.valueOf(listing.getUser().getUserId());
+//                NotificationDTO notificationDTO = new NotificationDTO();
+//                notificationDTO.setNotificationType(NotificationType.VIEWED.toString());
+//                notificationDTO.setReceiverId(notificationReceiverId);
+//                notificationDTO.setSenderId(String.valueOf(user.getUserId()));
+//                notificationDTO.setTitle("Someone added your listing to favorites");
+//                notificationDTO.setUserListingId(listingId);
+//                notificationDTO.setMessage("Favorites Notification");
+//                NotificationService.getInstance().insertNotification(notificationDTO);
+
+
+
                 Favorites favorite = new Favorites();
                 favorite.setUser(user);
                 favorite.setListing(listing);
                 favorite.setStatus(Favorites.Status.ADDED);
 
-                favoritesRepository.save(favorite);
 
-                return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listing added to favorites successfully", null));
+                return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listing added to favorites successfully",favoritesRepository.save(favorite)));
+
             } else {
                 return BadResponseMessage("User or listing not found !");
             }
@@ -58,7 +73,7 @@ public class FavoritesService {
     public ResponseEntity<?> getFavoritesByUserId(String userId) {
         UserTable user = userTableRepository.findById(Long.valueOf(userId)).orElse(null);
         if (user != null) {
-            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Add to Favorites Sucessfully !",favoritesRepository.findByUser(user)));
+            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Your Favorites fetched successfully!",favoritesRepository.findByUser(user)));
         }
         return BadResponseMessage("User Not Found !"); // Or handle if user is not found
     }

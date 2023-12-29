@@ -4,11 +4,13 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 import com.redeyesncode.estatespring.realestatebackend.jwt.JwtSecretKey;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.DashboardCountResponse;
 import com.redeyesncode.estatespring.realestatebackend.models.common.LoginJwtResponse;
 import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.ListingSearchCriteriaDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserRegistrationDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateDTO;
+import com.redeyesncode.estatespring.realestatebackend.repository.FavoritesRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.NotificationRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserListingRepo;
 import com.redeyesncode.estatespring.realestatebackend.repository.UserTableRepo;
@@ -34,6 +36,10 @@ public class UserService {
 
     @Autowired
     private NotificationRepo notificationRepo;
+
+    @Autowired
+    private FavoritesRepo favoritesRepo;
+
 
 
     private String jwtSecret = "springjwt";
@@ -279,13 +285,26 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteUser(String userId) {
+    public ResponseEntity<?> deleteUser(HashMap<String, String> deleteMap) {
+        String userId = deleteMap.get("userId");
+        String password = deleteMap.get("password");
+
 
         if(userTableRepo.existsById(Long.valueOf(userId))){
-            userListingRepo.deleteAllByUserId(Long.valueOf(userId));
-            userTableRepo.deleteById(Long.valueOf(userId));
+            //delete all relationships
+            if(password.equals(userTableRepo.getById(Long.valueOf(userId)))){
+                userTableRepo.deleteById(Long.valueOf(userId));
+                return SuccessResponseMessage("User Deleted successfully");
 
-            return SuccessResponseMessage("User Deleted successfully");
+            }else {
+                return BadResponseMessage("Password is wrong !");
+            }
+
+//            favoritesRepo.deleteByUser(userTableRepo.getById(Long.valueOf(userId)));
+
+//            userListingRepo.deleteAllByUserId(Long.valueOf(userId));
+
+
         }else {
             return BadResponseMessage("User Not Found !");
         }
@@ -323,17 +342,42 @@ public class UserService {
     public ResponseEntity<?> changeEmailAddress(HashMap<String,String> changeEmailAddressMap){
         Optional<UserTable> userTable = userTableRepo.findById(Long.valueOf(changeEmailAddressMap.get("userId")));
         if(userTable.isPresent()){
-            String currentEmailAddress = changeEmailAddressMap.get("currentEmail");
-            if(currentEmailAddress.equals(userTable.get().getEmail())){
-                String newEmailAddress = changeEmailAddressMap.get("newEmail");
-                UserTable userTable1 = userTable.get();
-                userTable1.setEmail(newEmailAddress);
-                userTableRepo.save(userTable1);
-                return SuccessResponseMessage("Email Address Updated !");
+            String password = changeEmailAddressMap.get("password");
+            if(password.equals(userTable.get().getPassword())){
+                String currentEmailAddress = changeEmailAddressMap.get("currentEmail");
+                if(currentEmailAddress.equals(userTable.get().getEmail())){
+                    String newEmailAddress = changeEmailAddressMap.get("newEmail");
+                    UserTable userTable1 = userTable.get();
+                    userTable1.setEmail(newEmailAddress);
+                    userTableRepo.save(userTable1);
+                    return SuccessResponseMessage("Email Address Updated !");
 
-            }else {
-                return BadResponseMessage("Email does not match !");
+                }else {
+                    return BadResponseMessage("Email does not match !");
+                }
+            }else{
+                return BadResponseMessage("Password is wrong !");
+
             }
+
+
+        }else {
+            return BadResponseMessage("User Not Found !");
+        }
+
+    }
+
+    public ResponseEntity<?> getDashboardCount(HashMap<String,String> dashboardMap){
+        Optional<UserTable> userTable = userTableRepo.findById(Long.valueOf(dashboardMap.get("userId")));
+        if(userTable.isPresent()){
+            UserTable user = userTable.get();
+            DashboardCountResponse dashboardCountResponse = new DashboardCountResponse();
+            dashboardCountResponse.setMessageCount("_development_");
+            dashboardCountResponse.setNotificationCount("_development_");
+            dashboardCountResponse.setSavedListing(String.valueOf(favoritesRepo.findByUser(user).size()));
+            dashboardCountResponse.setMyProperties(String.valueOf(userListingRepo.findAllByUserId((long) user.getUserId()).size()));
+
+            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Dashboard Response",dashboardCountResponse));
 
         }else {
             return BadResponseMessage("User Not Found !");
