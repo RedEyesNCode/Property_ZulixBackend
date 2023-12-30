@@ -3,7 +3,9 @@ package com.redeyesncode.estatespring.realestatebackend.service;
 import com.redeyesncode.estatespring.realestatebackend.models.*;
 import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
 import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
+import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
 import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.NotificationDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.TourRequestDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserListingDTO;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateListingDTO;
@@ -26,6 +28,10 @@ public class ListingService {
 
     @Autowired
     private PropertyDetailsRepo propertyDetailsRepo;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
 
     public ResponseEntity<?> addPropertyDetailsToUserListing(Long userListingId, PropertyDetails propertyDetails) {
@@ -101,7 +107,23 @@ public class ListingService {
 
     public ResponseEntity<?> updateListingStatusByListingId(String listingStatus, String listingId) {
         try {
-            UserListing.ListingStatus status = UserListing.ListingStatus.valueOf(listingStatus);
+            UserListing.ListingStatus status;
+
+            if(listingStatus.equals("INACTIVE")){
+                 status = UserListing.ListingStatus.INACTIVE;
+            }else if(listingStatus.equals("ACTIVE")){
+                 status = UserListing.ListingStatus.ACTIVE;
+            }else if(listingStatus.equals("REVIEWING")){
+                status = UserListing.ListingStatus.REVIEWING;
+
+            }else if (listingStatus.equals("DENIED")){
+                status = UserListing.ListingStatus.DENIED;
+
+            }else {
+               status = UserListing.ListingStatus.EMPTY;
+
+            }
+
             Long id = Long.valueOf(listingId);
 
             UserListing listing = userListingRepo.findById(id).orElse(null);
@@ -114,6 +136,17 @@ public class ListingService {
 
             // Save the updated listing
             UserListing updatedListing = userListingRepo.save(listing);
+
+            NotificationDTO notificationDTO = new NotificationDTO();
+            notificationDTO.setMessage("Your Listing Status has updated !");
+            notificationDTO.setTitle("Listing Status Update !");
+            notificationDTO.setUserListingId(String.valueOf(updatedListing.getId()));
+            notificationDTO.setSenderId("-1");
+            notificationDTO.setReceiverId(String.valueOf(updatedListing.getUser().getUserId()));
+            notificationDTO.setNotificationType(String.valueOf(NotificationType.VIEWED));
+
+            notificationService.insertNotification(notificationDTO);
+
 
             return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "Listing updated successfully", updatedListing));
         } catch (IllegalArgumentException e) {
@@ -184,6 +217,17 @@ public class ListingService {
             Long userListingId = Long.valueOf(tourRequestDTO.getListingId());
             Long userId = Long.valueOf(tourRequestDTO.getRequesterId());
 
+            NotificationDTO notificationDTO = new NotificationDTO();
+            notificationDTO.setMessage("You have received a Tour Request");
+            notificationDTO.setTitle("Listing Tour !");
+            notificationDTO.setUserListingId(String.valueOf(userListingId));
+            notificationDTO.setSenderId(String.valueOf(userId));
+            notificationDTO.setReceiverId(String.valueOf(userListingRepo.getById(Long.valueOf(userListingId)).getUser().getUserId()));
+            notificationDTO.setNotificationType(String.valueOf(NotificationType.VIEWED));
+
+            notificationService.insertNotification(notificationDTO);
+
+
             UserListing userListing = userListingRepo.findById(userListingId).orElse(null);
             UserTable requester = userTableRepo.findById(userId).orElse(null);
 
@@ -202,6 +246,9 @@ public class ListingService {
             tourRequest.setUserListing(userListing);
             tourRequest.setRequester(requester);
             tourRequest.setStatus(TourRequest.TourRequestStatus.EMPTY);
+
+
+
 
             TourRequest createdTourRequest = tourRequestRepository.save(tourRequest);
 
@@ -289,6 +336,7 @@ public class ListingService {
             // Save the updated user listing to the database
             try {
                 UserListing updatedUserListing = userListingRepo.save(existingUserListing);
+
                 return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "User listing updated", updatedUserListing));
             } catch (Exception e) {
                 return BadResponseMessage("Failed to update user listing");

@@ -384,4 +384,10 @@ public class UserService {
         }
 
     }
+
+    public ResponseEntity<?> getAllUsers() {
+
+        return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Users !",userTableRepo.findAll()));
+
+    }
 }

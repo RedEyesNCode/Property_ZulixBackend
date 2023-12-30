@@ -27,8 +27,7 @@ public class NotificationService {
 
 
     // Private constructor to prevent instantiation
-    private NotificationService() {
-    }
+
 
     // Singleton getInstance method
     public static synchronized NotificationService getInstance() {
@@ -56,7 +55,16 @@ public class NotificationService {
             notification.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
 
             notificationRepository.save(notification);
-        } else {
+        } else if(sender==null && receiver !=null && userListing!=null) {
+            notification.setSender(null);
+            notification.setReceiver(receiver);
+            notification.setUserListing(userListing);
+            notification.setTitle(notificationDTO.getTitle());
+            notification.setMessage(notificationDTO.getMessage());
+            notification.setNotificationType(NotificationType.valueOf(notificationDTO.getNotificationType()));
+            notification.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
+
+            notificationRepository.save(notification);
             // Handle scenarios where entities are not found
             return;
             // For example: throw an exception, log an error, or perform appropriate error handling

@@ -7,6 +7,7 @@ import com.redeyesncode.estatespring.realestatebackend.service.FavoritesService;
 import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
 import com.redeyesncode.estatespring.realestatebackend.service.NotificationService;
 import com.redeyesncode.estatespring.realestatebackend.service.UserService;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -178,6 +179,10 @@ public class UserController {
     public ResponseEntity<?> getDashboardCount(@RequestBody HashMap<String,String> map){
         return userService.getDashboardCount(map);
 
+    }
+    @GetMapping("/get-all-user")
+    public ResponseEntity<?> getUser(){
+        return userService.getAllUsers();
     }
 
 }
