@@ -3,10 +3,7 @@ package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
-import com.redeyesncode.estatespring.realestatebackend.service.FavoritesService;
-import com.redeyesncode.estatespring.realestatebackend.service.ListingService;
-import com.redeyesncode.estatespring.realestatebackend.service.NotificationService;
-import com.redeyesncode.estatespring.realestatebackend.service.UserService;
+import com.redeyesncode.estatespring.realestatebackend.service.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +26,10 @@ public class UserController {
 
     @Autowired
     private FavoritesService favoritesService;
+
+
+    @Autowired
+    private InsightPropertyService insightPropertyService;
 
 
 
@@ -184,5 +185,17 @@ public class UserController {
     public ResponseEntity<?> getUser(){
         return userService.getAllUsers();
     }
+
+    @PostMapping("/update-listing-insight")
+    public ResponseEntity<?> updateListing(@RequestBody HashMap<String,String> insightMap){
+
+        return insightPropertyService.updateCreateInsightProperty(insightMap.get("listingId"),insightMap.get("updateType"));
+
+    }
+    @PostMapping("/get-listing-insight")
+    public ResponseEntity<?> getListingInsight(@RequestBody HashMap<String,String> getListingInsightMap){
+        return insightPropertyService.getListingInsight(getListingInsightMap.get("listingId"));
+    }
+
 
 }

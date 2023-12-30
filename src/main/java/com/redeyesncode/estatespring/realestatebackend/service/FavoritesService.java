@@ -34,6 +34,10 @@ public class FavoritesService {
     @Autowired
     private UserListingRepo userListingRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
+
     public ResponseEntity<?> addtoFavorites(String userId, String listingId) {
         try {
             Optional<UserTable> userOptional = userTableRepository.findById(Long.valueOf(userId));
@@ -43,15 +47,15 @@ public class FavoritesService {
                 UserTable user = userOptional.get();
                 UserListing listing = listingOptional.get();
 
-//                String notificationReceiverId = String.valueOf(listing.getUser().getUserId());
-//                NotificationDTO notificationDTO = new NotificationDTO();
-//                notificationDTO.setNotificationType(NotificationType.VIEWED.toString());
-//                notificationDTO.setReceiverId(notificationReceiverId);
-//                notificationDTO.setSenderId(String.valueOf(user.getUserId()));
-//                notificationDTO.setTitle("Someone added your listing to favorites");
-//                notificationDTO.setUserListingId(listingId);
-//                notificationDTO.setMessage("Favorites Notification");
-//                NotificationService.getInstance().insertNotification(notificationDTO);
+                String notificationReceiverId = String.valueOf(listing.getUser().getUserId());
+                NotificationDTO notificationDTO = new NotificationDTO();
+                notificationDTO.setNotificationType(NotificationType.VIEWED.toString());
+                notificationDTO.setReceiverId(notificationReceiverId);
+                notificationDTO.setSenderId(String.valueOf(user.getUserId()));
+                notificationDTO.setTitle("Someone added your listing to favorites");
+                notificationDTO.setUserListingId(listingId);
+                notificationDTO.setMessage("Favorites Notification");
+                notificationService.insertNotification(notificationDTO);
 
 
 
