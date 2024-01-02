@@ -31,6 +31,10 @@ public class UserController {
     @Autowired
     private InsightPropertyService insightPropertyService;
 
+    @Autowired
+    private AddonService addonService;
+
+
 
 
 
@@ -197,5 +201,57 @@ public class UserController {
         return insightPropertyService.getListingInsight(getListingInsightMap.get("listingId"));
     }
 
+    //Subscriptions Packages.
 
+    @PostMapping("/sub-admin/add-package-addon")
+    public ResponseEntity<?> addPackage(@RequestBody AddonDto addonDto){
+        return addonService.addPackage(addonDto);
+
+    }
+    @PostMapping("/sub-admin/add-subscription")
+    public ResponseEntity<?> addSubscription(@RequestBody SubscriptionDTO addonDto){
+        return addonService.addSubscription(addonDto);
+
+    }
+
+    @PostMapping("/add-listing-subscription")
+    public ResponseEntity<?> addListingSubscription(@RequestBody HashMap<String,String> map){
+
+
+        return addonService.addSubscriptionForUserListing(map.get("listingId"),map.get("subscriptionId"));
+
+
+    }
+    @PostMapping("/remove-listing-subscription")
+    public ResponseEntity<?> removeListingSubscription(@RequestBody HashMap<String,String> map){
+        return addonService.removeSubscriptionFromUserListing(map.get("listingId"),map.get("subscriptionId"));
+
+    }
+
+
+    @DeleteMapping("/sub-admin/delete-package-addon")
+    public ResponseEntity<?> deletePackage(@RequestBody HashMap<String,String> map){
+        return addonService.deletePackage(map
+                .get("packageId"));
+    }
+
+    @PostMapping("/get-addons")
+    public ResponseEntity<?> getAddons(){
+        return addonService.getPackages();
+    }
+
+    @PostMapping("/get-subscriptions")
+    public ResponseEntity<?> getSubscriptions(){
+        return addonService.getSubscriptions();
+    }
+
+    @PostMapping("/add-listing-addon")
+    public ResponseEntity<?> addLisitingAddon(@RequestBody HashMap<String,String > map){
+        return listingService.addAddonPackageForUserListing(Long.valueOf(map.get("listingId")),Long.valueOf(map.get("packageId")));
+    }
+
+    @PostMapping("/remove-listing-addon")
+    public ResponseEntity<?> removeListingAddon(@RequestBody HashMap<String,String> map){
+        return listingService.removeAddonPackageFromUserListing(Long.valueOf(map.get("listingId")),Long.valueOf(map.get("packageId")));
+    }
 }

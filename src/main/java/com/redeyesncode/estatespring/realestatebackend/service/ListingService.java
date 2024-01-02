@@ -5,10 +5,7 @@ import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatu
 import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
 import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
 import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
-import com.redeyesncode.estatespring.realestatebackend.models.dto.NotificationDTO;
-import com.redeyesncode.estatespring.realestatebackend.models.dto.TourRequestDTO;
-import com.redeyesncode.estatespring.realestatebackend.models.dto.UserListingDTO;
-import com.redeyesncode.estatespring.realestatebackend.models.dto.UserUpdateListingDTO;
+import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
 import com.redeyesncode.estatespring.realestatebackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -100,6 +97,69 @@ public class ListingService {
             }
 
             // Return the listings in the desired format
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+    @Autowired
+    private AddOnRepository addOnRepository;
+
+    public ResponseEntity<?> addAddonPackageForUserListing(Long userListingId, Long packageId) {
+        try {
+            Optional<UserListing> userListingOptional = userListingRepo.findById(userListingId);
+            if (userListingOptional.isPresent()) {
+                UserListing userListing = userListingOptional.get();
+
+                if (addOnRepository.existsById(packageId)) {
+                    AddonPackage addonPackage = addOnRepository.getById(packageId);
+
+                    // Ensure the addonPackage is not already associated with the UserListing
+                    if (!userListing.getAddonPackages().contains(addonPackage)) {
+                        List<AddonPackage> addonPackages = userListing.getAddonPackages();
+                        addonPackages.add(addonPackage);
+                        userListing.setAddonPackages(addonPackages);
+
+                        userListingRepo.saveAndFlush(userListing);
+                        return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "AddonPackage added to UserListing successfully!", userListing));
+                    } else {
+                        return BadResponseMessage("AddonPackage is already associated with the UserListing!");
+                    }
+                } else {
+                    return BadResponseMessage("AddonPackage not found!");
+                }
+            } else {
+                return BadResponseMessage("UserListing Not Found!");
+            }
+        } catch (Exception e) {
+            return BadResponseMessage(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> removeAddonPackageFromUserListing(Long userListingId, Long packageId) {
+        try {
+            Optional<UserListing> userListingOptional = userListingRepo.findById(userListingId);
+            if (userListingOptional.isPresent()) {
+                UserListing userListing = userListingOptional.get();
+
+                if (addOnRepository.existsById(packageId)) {
+                    AddonPackage addonPackage = addOnRepository.getById(packageId);
+
+                    if (userListing.getAddonPackages().contains(addonPackage)) {
+                        List<AddonPackage> addonPackages = userListing.getAddonPackages();
+                        addonPackages.remove(addonPackage);
+                        userListing.setAddonPackages(addonPackages);
+
+                        userListingRepo.saveAndFlush(userListing);
+                        return ResponseEntity.ok(new CustomStatusCodeModel("200", 200, "AddonPackage removed from UserListing successfully!", userListing));
+                    } else {
+                        return BadResponseMessage("AddonPackage is not associated with the UserListing!");
+                    }
+                } else {
+                    return BadResponseMessage("AddonPackage not found!");
+                }
+            } else {
+                return BadResponseMessage("UserListing Not Found!");
+            }
         } catch (Exception e) {
             return BadResponseMessage(e.getMessage());
         }

@@ -4,6 +4,9 @@ import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 public class UserListing {
@@ -27,6 +30,12 @@ public class UserListing {
 
     @Enumerated(EnumType.STRING)
     private ListingStatus listingStatus = ListingStatus.REVIEWING;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userListing")
+    private List<AddonPackage> addonPackages = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Subscription subscription;
 
     private String deniedReason = "";
     // Constructors, getters, setters, etc.
