@@ -2,8 +2,13 @@ package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
+import com.redeyesncode.estatespring.realestatebackend.models.UserListing;
+import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
 import com.redeyesncode.estatespring.realestatebackend.service.*;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +21,7 @@ import java.util.HashMap;
 @RequestMapping("/spring-property")
 public class UserController {
     @Autowired
-    private UserService userService;
+    private UserService  userService;
 
     @Autowired
     private ListingService listingService;
@@ -33,6 +38,10 @@ public class UserController {
 
     @Autowired
     private AddonService addonService;
+
+    @Autowired
+    private PaymentService paymentService;
+
 
 
 
@@ -253,5 +262,52 @@ public class UserController {
     @PostMapping("/remove-listing-addon")
     public ResponseEntity<?> removeListingAddon(@RequestBody HashMap<String,String> map){
         return listingService.removeAddonPackageFromUserListing(Long.valueOf(map.get("listingId")),Long.valueOf(map.get("packageId")));
+    }
+
+    @PostMapping("/get-listing-bill")
+    private ResponseEntity<?> getListingAmount(@RequestBody HashMap<String ,String> map){
+        return listingService.getListingBill(map.get("listingId"));
+
+    }
+
+    @PostMapping("/create-payment-intent")
+    private ResponseEntity<?> createPaymentIntent(@RequestBody HashMap<String,String> map){
+        try {
+            return paymentService.createPaymentIntent(Long.parseLong(map.get("amount")),map.get("currency"),map
+                    .get("paymentMethodId"));
+        } catch (StripeException e) {
+            return ResponseEntity.badRequest().body(new StatusCodeModel("400",400,e.getMessage()));
+        }
+
+    }
+
+    @PostMapping("/create-payment-method-id")
+    private ResponseEntity<?> createPaymentMethodId(@RequestBody HashMap<String,String> map){
+        try {
+            return paymentService.createPaymentMethod(map);
+        }catch (StripeException e){
+            return ResponseEntity.badRequest().body(new StatusCodeModel("400",400,e.getMessage()));
+
+        }
+    }
+
+
+    @PostMapping("/verify-payment")
+    public ResponseEntity<?> verifyPayment(@RequestBody HashMap<String, String> map) {
+        String listingId = map.get("listingId"); // Replace with the actual listingId
+        String paymentIntentId = map.get("paymentIntentId");
+
+        boolean isPaymentSuccessful = paymentService.verifyPaymentMethod(paymentIntentId);
+
+        if (isPaymentSuccessful) {
+            listingService.createPaymentRecord(listingId, paymentIntentId);
+
+            // Fetch UserListing based on listingId
+            return ResponseEntity.ok("Payment successful!");
+
+
+        } else {
+            return ResponseEntity.status(400).body(new StatusCodeModel("400", 400, "Payment not successfully done!"));
+        }
     }
 }

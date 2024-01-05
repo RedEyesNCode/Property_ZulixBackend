@@ -1,5 +1,6 @@
 package com.redeyesncode.estatespring.realestatebackend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserListing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +33,13 @@ public class UserListing {
     @Enumerated(EnumType.STRING)
     private ListingStatus listingStatus = ListingStatus.REVIEWING;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userListing")
-    private List<AddonPackage> addonPackages = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<AddonPackage> addonPackages;
+
+    @OneToOne(mappedBy = "userListing", cascade = CascadeType.ALL)
+    private PaymentRecord paymentRecord;
+
 
     @OneToOne(cascade = CascadeType.ALL)
     private Subscription subscription;

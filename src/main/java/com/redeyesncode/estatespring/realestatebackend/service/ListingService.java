@@ -1,16 +1,16 @@
 package com.redeyesncode.estatespring.realestatebackend.service;
 
 import com.redeyesncode.estatespring.realestatebackend.models.*;
-import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
-import com.redeyesncode.estatespring.realestatebackend.models.common.ListingType;
-import com.redeyesncode.estatespring.realestatebackend.models.common.NotificationType;
-import com.redeyesncode.estatespring.realestatebackend.models.common.StatusCodeModel;
+import com.redeyesncode.estatespring.realestatebackend.models.common.*;
 import com.redeyesncode.estatespring.realestatebackend.models.dto.*;
 import com.redeyesncode.estatespring.realestatebackend.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +29,8 @@ public class ListingService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private PaymentRecordRepo paymentRecordRepository;
 
 
     public ResponseEntity<?> addPropertyDetailsToUserListing(Long userListingId, PropertyDetails propertyDetails) {
@@ -104,6 +106,8 @@ public class ListingService {
     @Autowired
     private AddOnRepository addOnRepository;
 
+
+    @Transactional
     public ResponseEntity<?> addAddonPackageForUserListing(Long userListingId, Long packageId) {
         try {
             Optional<UserListing> userListingOptional = userListingRepo.findById(userListingId);
@@ -133,6 +137,27 @@ public class ListingService {
         } catch (Exception e) {
             return BadResponseMessage(e.getMessage());
         }
+    }
+
+    public ResponseEntity<?> getListingBill(String listingId){
+        try {
+            Optional<UserListing> userListingOptional = userListingRepo.findById(Long.valueOf(listingId));
+            if (userListingOptional.isPresent()) {
+                ResponseListingBill responseListingBill = new ResponseListingBill();
+                responseListingBill.setSubscription(userListingOptional.get().getSubscription());
+                responseListingBill.setAddons(userListingOptional.get().getAddonPackages());
+                responseListingBill.setTotalBill(userListingRepo.calculateTotalPriceForUserListing(Long.valueOf(listingId)));
+                return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"Total-Listing Bill",responseListingBill));
+
+            } else {
+               return BadResponseMessage("Listing Not Found");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return BadResponseMessage(e.getMessage());
+
+        }
+
     }
 
     public ResponseEntity<?> removeAddonPackageFromUserListing(Long userListingId, Long packageId) {
@@ -404,5 +429,26 @@ public class ListingService {
         } else {
             return BadResponseMessage("User listing not found");
         }
+    }
+
+    public void createPaymentRecord(String listingId, String paymentIntentId) {
+        // Assuming PaymentRecord entity has setters for listingId and paymentIntentId
+        PaymentRecord paymentRecord = new PaymentRecord();
+        Optional<UserListing> userListingOptional = userListingRepo.findById(Long.valueOf(listingId));
+
+        if(userListingOptional.isPresent()){
+            if(!paymentRecordRepository.existsByUserListing(userListingOptional.get())){
+                paymentRecord.setPaymentMethod("card");
+                paymentRecord.setPaymentDate(LocalDateTime.now());
+                paymentRecord.setPaymentStatus("success");
+                paymentRecord.setUserListing(userListingOptional.get());
+                paymentRecord.setPaymentIntentId(paymentIntentId);
+                paymentRecordRepository.save(paymentRecord);
+
+            }
+
+        }
+
+        // Save the PaymentRecord entity
     }
 }

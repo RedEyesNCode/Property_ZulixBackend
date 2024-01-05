@@ -1,6 +1,7 @@
 package com.redeyesncode.estatespring.realestatebackend.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AddonPackage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,9 +23,7 @@ public class AddonPackage {
     private String packageMessage;
     private double price;
 
-    @ManyToOne
-    @JoinColumn(name = "user_listing_id")
-    private UserListing userListing;
+
     // Constructors, getters, and setters go here
 
     // Don't forget your constructors, getters, setters, or any other methods you need for this entity!

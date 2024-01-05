@@ -8,6 +8,12 @@ cloud:
     stack:
       auto: false
 
+stripe:
+  api:
+    key: sk_test_51MTJ3WSGxlhGWErCSNOb0EsUx6t3bmKZBM6E35PFJx8VPdj3rfTthnb6ymURRgUchzdv7YTm7q0feSrbzDbV31Fc00ezeQQpou
+
+
+
 application:
   bucket:
     name: redeyesncodemaster
