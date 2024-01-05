@@ -1,6 +1,7 @@
 package com.redeyesncode.estatespring.realestatebackend.controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redeyesncode.estatespring.realestatebackend.aws.StorageService;
 import com.redeyesncode.estatespring.realestatebackend.models.UserListing;
 import com.redeyesncode.estatespring.realestatebackend.models.common.CustomStatusCodeModel;
@@ -310,4 +311,24 @@ public class UserController {
             return ResponseEntity.status(400).body(new StatusCodeModel("400", 400, "Payment not successfully done!"));
         }
     }
+
+    @PostMapping("/check-new-chat")
+    public ResponseEntity<?> checkNewChat(@RequestBody HashMap<String,String> map){
+        try {
+            return listingService.checkNewChat(map);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body(new StatusCodeModel("400",400,"Bad Request"));
+
+        }
+
+    }
+
+
+//    @PostMapping("/get-listing-messages")
+//    public ResponseEntity<?> getListingMessages(@RequestBody HashMap<String,String> map){
+//        return listingService.getMessageByRoom(map.get("roomName"));
+//
+//
+//    }
+
 }
