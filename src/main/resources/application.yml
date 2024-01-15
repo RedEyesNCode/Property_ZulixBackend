@@ -27,5 +27,4 @@ spring:
       max-file-size: 50MB
       max-request-size: 45MB
 
-server:
-  port: 6767
+

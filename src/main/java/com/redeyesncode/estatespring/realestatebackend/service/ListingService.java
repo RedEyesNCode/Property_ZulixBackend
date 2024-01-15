@@ -13,6 +13,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -465,51 +466,52 @@ public class ListingService {
         String clientUserId = hashMap.get("clientUserId");
         String listingId = hashMap.get("listingId");
 
-
         List<ChatRoomTable> chatRoomTables = chatRoomRepo.findAll();
 
-        if(chatRoomTables.isEmpty()){
-            // make a new room
-            chatRoomRepo.save(new ChatRoomTable("ashu_"+currentUserId+"_geetu"+clientUserId,clientUserId,currentUserId,listingId));
-            chatRoomRepo.save(new ChatRoomTable("ashu_"+currentUserId+"_geetu"+clientUserId,currentUserId,clientUserId,listingId));
-            chatRoomRepo.flush();
-            HashMap<String, String> hashMapRoom = new HashMap<>();
-            hashMap.put("isNewChat","true");
-            hashMap.put("room_name","ashu_"+currentUserId+"_geetu"+clientUserId);
-            String json = new ObjectMapper().writeValueAsString(hashMapRoom);
-
-            ChatMapModel chatMapModel = new ChatMapModel("ashu_"+currentUserId+"_geetu"+clientUserId,true);
-
-            return ResponseEntity.ok(new CustomStatusCodeModel("success",200,"New Room Created", new ChatRoomTable(-1L,"ashu_"+currentUserId+"_geetu"+clientUserId,clientUserId,currentUserId,listingId)));
-
-        }else{
-            for (int i = 0; i < chatRoomTables.size(); i++) {
-                if(chatRoomTables.get(i).getCurrentUserId().equals(currentUserId) && chatRoomTables.get(i).getClientUserId().equals(clientUserId)  ){
-                    return ResponseEntity.ok(new CustomStatusCodeModel("success",200,"Chat history is available",chatRoomTables.get(i)));
-                }else if(chatRoomTables.get(i).getCurrentUserId().equals(clientUserId) && chatRoomTables.get(i).getClientUserId().equals(currentUserId)){
-                    return ResponseEntity.ok(new CustomStatusCodeModel("success",200,"Chat history is available",chatRoomTables.get(i)));
-                }else if(chatRoomTables.get(i).getCurrentUserId().equals(currentUserId) && !chatRoomTables.get(i).getClientUserId().equals(clientUserId)){
-                    chatRoomRepo.save(new ChatRoomTable("ashu_"+currentUserId+"_geetu"+clientUserId,currentUserId,clientUserId,listingId));
-                    chatRoomRepo.save(new ChatRoomTable("ashu_"+currentUserId+"_geetu"+clientUserId,clientUserId,currentUserId,listingId));
-                    chatRoomRepo.flush();
-                    return ResponseEntity.ok(new CustomStatusCodeModel("success",200,"New Room Created",new ChatRoomTable(-1L,"ashu_"+currentUserId+"_geetu"+clientUserId,clientUserId,currentUserId,listingId)));
-
-                }
+        for (ChatRoomTable chatRoom : chatRoomTables) {
+            if ((String.valueOf(chatRoom.getCurrentUser().getUserId()).equals(currentUserId) && String.valueOf(chatRoom.getClientUser().getUserId()).equals(clientUserId)) ||
+                    ((String.valueOf(chatRoom.getCurrentUser().getUserId()).equals(clientUserId) && (String.valueOf(chatRoom.getClientUser().getUserId()).equals(currentUserId))))) {
+                // Chat room exists, return details
+                return ResponseEntity.ok(new CustomStatusCodeModel("success", 200, "Chat history is available", chatRoom));
             }
-            return ResponseEntity.ok(new StatusCodeModel("fail",200,"Something Went Wrong !"));
         }
 
+        // If the loop completes without finding a match, create a new chat room
+        String roomName = "ashu_" + currentUserId + "_geetu" + clientUserId;
+        UserTable currentUser = userTableRepo.getById(Long.valueOf(currentUserId));
+        UserTable clientUser = userTableRepo.getById(Long.valueOf(clientUserId));
+
+        ChatRoomTable newChatRoom = new ChatRoomTable(roomName, currentUser, clientUser, listingId);
+        chatRoomRepo.save(newChatRoom);
+
+        return ResponseEntity.ok(new CustomStatusCodeModel("success", 200, "New Room Created", newChatRoom));
+    }
+    public ResponseEntity<?> getMessageByRoom(String roomName) {
+        List<ChatMessage> messages = chatMessageRepo.findByRoomName(roomName);
+
+        return ResponseEntity.ok(new CustomStatusCodeModel("success",200,messages));
+
+
+    }
+
+    public ResponseEntity<?> getUserMessages(HashMap<String, String> map) {
+        String userId = map.get("userId");
+        List<UserListing> listings = userListingRepo.findAllByUserId(Long.valueOf(userId));
+        ArrayList<UserListingMessageModel> messages = new ArrayList<>();
+
+        List<ChatRoomTable> roomTables = new ArrayList<>();
+
+        List<ChatRoomTable> chatRoomTables = new ArrayList<>();
+        List<ChatMessage> chatMessages = new ArrayList<>();
+
+        UserMessageResponse userMessageResponse = new UserMessageResponse();
+        userMessageResponse.setCode(200);
+        userMessageResponse.setData(messages);
+        userMessageResponse.setMessage("Messages Loaded");
+        return ResponseEntity.ok(userMessageResponse);
 
 
 
 
     }
-
-//    public ResponseEntity<?> getMessageByRoom(String roomName) {
-//        List<ChatMessage> messages = chatMessageRepo.findX(roomName);
-//
-//        return ResponseEntity.ok(new CustomStatusCodeModel("success",200,messages));
-//
-//
-//    }
 }

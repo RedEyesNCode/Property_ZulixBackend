@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface ChatMessageRepo extends JpaRepository<ChatMessage,Long> {
 
-//    @Query("SELECT n FROM ChatMessage n WHERE n.roomName = :roomName")
-//    List<ChatMessage> findX(String roomName);
+    @Query("SELECT c FROM ChatMessage c WHERE c.roomName = :roomName")
+    List<ChatMessage> findByRoomName(String roomName);
 
 
 }

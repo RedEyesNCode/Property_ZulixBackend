@@ -17,4 +17,7 @@ public interface ChatRoomRepo extends JpaRepository<ChatRoomTable,Long> {
 //    List<ChatRoomTable> findEntityBySenderID(@Param("currentUserId") Long roomName);
 
 
+    @Query("SELECT cr FROM ChatRoomTable cr WHERE cr.userListingId = :userListingId")
+    List<ChatRoomTable> findByUserListingId(String userListingId);
+
 }

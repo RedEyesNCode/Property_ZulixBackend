@@ -324,11 +324,16 @@ public class UserController {
     }
 
 
-//    @PostMapping("/get-listing-messages")
-//    public ResponseEntity<?> getListingMessages(@RequestBody HashMap<String,String> map){
-//        return listingService.getMessageByRoom(map.get("roomName"));
-//
-//
-//    }
+    @PostMapping("/get-room-messages")
+    public ResponseEntity<?> getListingMessages(@RequestBody HashMap<String,String> map){
+        return listingService.getMessageByRoom(map.get("roomName"));
+
+
+    }
+
+    @PostMapping("/get-user-messages")
+    public ResponseEntity<?> getUserMessages(@RequestBody HashMap<String,String> map){
+        return listingService.getUserMessages(map);
+    }
 
 }

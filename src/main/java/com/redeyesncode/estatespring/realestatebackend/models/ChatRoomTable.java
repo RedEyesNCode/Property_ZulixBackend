@@ -17,28 +17,30 @@ import lombok.Setter;
 public class ChatRoomTable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "chat_room_bumble_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String roomName;
     // roomName would be currentUserId+clientUserId+geetu_ashu
 
-    private String currentUserId;
+    @ManyToOne
+    private UserTable currentUser;
 
-    private String clientUserId;
+    @ManyToOne
+    private UserTable clientUser;
+
+
 
     private String userListingId;
 
 
+    public ChatRoomTable(String roomName, UserTable currentUser, UserTable clientUser, String listingId) {
 
-
-    public ChatRoomTable(String roomName, String currentUserId, String clientUserId,String userListingId) {
         this.roomName = roomName;
-        this.currentUserId = currentUserId;
-        this.userListingId = userListingId;
+        this.clientUser = clientUser;
+        this.currentUser = currentUser;
+        this.userListingId = listingId;
 
-        this.clientUserId = clientUserId;
+
     }
-
-
 }
