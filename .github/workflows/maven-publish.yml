@@ -30,8 +30,3 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B clean package -DskipTests
-
-    - name: Move JAR file with timestamp
-      run: |
-        timestamp=$(date +%Y%m%d%H%M%S)
-        mv target/realestate_backend-*.jar "realestate_backend-$timestamp.jar"
