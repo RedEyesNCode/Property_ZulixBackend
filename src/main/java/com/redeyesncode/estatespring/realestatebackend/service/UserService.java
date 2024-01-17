@@ -324,7 +324,10 @@ public class UserService {
             String confirmNewPassword = passwordMap.get("confirmPassword");
             if(userTable.get().getPassword().equals(currentPassword)){
                 if(newPassword.equals(confirmNewPassword)){
-                    userTable.get().setPassword(newPassword);
+                    UserTable userTemp = userTable.get();
+                    userTemp.setPassword(newPassword);
+                    userTableRepo.saveAndFlush(userTemp);
+
                     return SuccessResponseMessage("Password updated !");
 
 
