@@ -23,15 +23,10 @@ jobs:
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
-
-    - name: Move JAR file with timestamp
-      run: |
-        timestamp=$(date +%Y%m%d%H%M%S)
-        mv target/realestate_backend-*.jar "realestate_backend-$timestamp.jar"
+      run: mvn -B clean package -DskipTests
