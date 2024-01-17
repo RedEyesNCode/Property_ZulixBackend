@@ -259,7 +259,7 @@ public class UserService {
             loginJwtResponse.setUser(checkUserLogin);
             loginJwtResponse.setJWT(generateJwtToken(checkUserLogin.getEmail()));
             loginJwtResponse.setMessage("Login Successfully");
-            loginJwtResponse.setStatus("200 CI USING GITHUB");
+            loginJwtResponse.setStatus("200 CI USING GITHUB-MAVEN SCRIPT");
 
             return ResponseEntity.ok(loginJwtResponse);
         } else {
