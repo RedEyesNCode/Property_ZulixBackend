@@ -50,21 +50,23 @@ public class CustomHeaderFilter implements Filter {
         String requestURI = httpRequest.getRequestURI();
 
         if (excludedEndpoints.contains(requestURI)) {
-            if(headerValue.equals("application/javascript")){
-                filterChain.doFilter(servletRequest, servletResponse);
+//            if(headerValue.equals("application/javascript")){
+//                filterChain.doFilter(servletRequest, servletResponse);
+//
+//            }else{
+//                StatusCodeModel statusCodeModel = new StatusCodeModel(String.valueOf(HttpStatus.FORBIDDEN.value()),403, "Application Type Not Supported");
+//
+//                // Convert StatusCodeModel to JSON
+//                String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
+//
+//                // Set the response content type to JSON
+//                servletResponse.setContentType("application/json");
+//
+//                // Write the JSON response to the output stream
+//                servletResponse.getWriter().write(jsonResponse);
+//            }
+            filterChain.doFilter(servletRequest, servletResponse);
 
-            }else{
-                StatusCodeModel statusCodeModel = new StatusCodeModel(String.valueOf(HttpStatus.FORBIDDEN.value()),403, "Application Type Not Supported");
-
-                // Convert StatusCodeModel to JSON
-                String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
-
-                // Set the response content type to JSON
-                servletResponse.setContentType("application/json");
-
-                // Write the JSON response to the output stream
-                servletResponse.getWriter().write(jsonResponse);
-            }
             return;
         }else if (headerValue != null && !headerValue.isEmpty()) {
 

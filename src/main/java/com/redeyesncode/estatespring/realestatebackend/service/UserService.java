@@ -246,18 +246,24 @@ public class UserService {
         String mail = loginMap.get("mail");
         String password = loginMap.get("password");
         String number = loginMap.get("telephoneNumber");
-        UserTable checkUserLogin = userTableRepo.findByEmailAndTelephoneNumberAndPassword(mail,number,password);
-        if(checkUserLogin!=null){
+
+        // Check if either email or telephone number matches
+        UserTable checkUserLogin = userTableRepo.findByEmailAndPassword(mail, password);
+        if (checkUserLogin == null) {
+            checkUserLogin = userTableRepo.findByTelephoneAndPassword(number, password);
+        }
+
+        if (checkUserLogin != null) {
             LoginJwtResponse loginJwtResponse = new LoginJwtResponse();
             loginJwtResponse.setCode(200);
             loginJwtResponse.setUser(checkUserLogin);
             loginJwtResponse.setJWT(generateJwtToken(checkUserLogin.getEmail()));
-            loginJwtResponse.setMessage("Login Successfully ");
+            loginJwtResponse.setMessage("Login Successfully");
             loginJwtResponse.setStatus("200 OK");
 
             return ResponseEntity.ok(loginJwtResponse);
-        }else {
-            return BadResponseMessage("User not found !");
+        } else {
+            return BadResponseMessage("User not found!");
         }
 
     }

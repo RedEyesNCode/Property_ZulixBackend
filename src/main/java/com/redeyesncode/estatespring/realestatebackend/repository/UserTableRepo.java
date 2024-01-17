@@ -17,4 +17,11 @@ public interface UserTableRepo extends JpaRepository<UserTable,Long> {
 
     @Query("SELECT u FROM UserTable u WHERE u.email = :email AND u.telephoneNumber = :telephoneNumber AND u.password = :password")
     UserTable findByEmailAndTelephoneNumberAndPassword(String email, String telephoneNumber, String password);
+
+    @Query("SELECT u FROM UserTable u WHERE u.email = :email AND u.password = :password")
+    UserTable findByEmailAndPassword(String email, String password);
+
+    @Query("SELECT u FROM UserTable u WHERE u.telephoneNumber = :telephoneNumber AND u.password = :password")
+    UserTable findByTelephoneAndPassword(String telephoneNumber, String password);
+
 }
