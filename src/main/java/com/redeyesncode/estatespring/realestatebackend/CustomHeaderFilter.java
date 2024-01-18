@@ -9,8 +9,10 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -48,24 +50,15 @@ public class CustomHeaderFilter implements Filter {
         String JwtHeader = httpRequest.getHeader("Authorization");
 
         String requestURI = httpRequest.getRequestURI();
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
+        response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader(HEADER_TO_CHECK,headerValue);
 
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, x-api-key");
         if (excludedEndpoints.contains(requestURI)) {
-//            if(headerValue.equals("application/javascript")){
-//                filterChain.doFilter(servletRequest, servletResponse);
-//
-//            }else{
-//                StatusCodeModel statusCodeModel = new StatusCodeModel(String.valueOf(HttpStatus.FORBIDDEN.value()),403, "Application Type Not Supported");
-//
-//                // Convert StatusCodeModel to JSON
-//                String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
-//
-//                // Set the response content type to JSON
-//                servletResponse.setContentType("application/json");
-//
-//                // Write the JSON response to the output stream
-//                servletResponse.getWriter().write(jsonResponse);
-//            }
-            filterChain.doFilter(servletRequest, servletResponse);
+            filterChain.doFilter(servletRequest, response);
 
             return;
         }else if (headerValue != null && !headerValue.isEmpty()) {
@@ -75,7 +68,7 @@ public class CustomHeaderFilter implements Filter {
             // You can access the header value via headerValue variable
             if(headerValue.equals("application/javascript") && isValidJWTToken(JwtHeader)){
 
-                filterChain.doFilter(servletRequest, servletResponse);
+                filterChain.doFilter(servletRequest, response);
 
             }else if(!isValidJWTToken(JwtHeader)){
                 StatusCodeModel statusCodeModel = new StatusCodeModel(String.valueOf(HttpStatus.FORBIDDEN.value()),403, "Token Expired.");
@@ -84,10 +77,10 @@ public class CustomHeaderFilter implements Filter {
                 String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
 
                 // Set the response content type to JSON
-                servletResponse.setContentType("application/json");
 
                 // Write the JSON response to the output stream
-                servletResponse.getWriter().write(jsonResponse);
+                response.getOutputStream().write(jsonResponse.getBytes());
+//                filterChain.doFilter(servletRequest, response);
 
             }else {
                 StatusCodeModel statusCodeModel = new StatusCodeModel(String.valueOf(HttpStatus.FORBIDDEN.value()),403, "Application Type Not Supported");
@@ -96,10 +89,11 @@ public class CustomHeaderFilter implements Filter {
                 String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
 
                 // Set the response content type to JSON
-                servletResponse.setContentType("application/json");
 
                 // Write the JSON response to the output stream
-                servletResponse.getWriter().write(jsonResponse);
+                response.getOutputStream().write(jsonResponse.getBytes());
+//                filterChain.doFilter(servletRequest, response);
+
             }
 
             System.out.println("Incoming request has the header: " + HEADER_TO_CHECK);
@@ -113,10 +107,17 @@ public class CustomHeaderFilter implements Filter {
             String jsonResponse = objectMapper.writeValueAsString(statusCodeModel);
 
             // Set the response content type to JSON
-            servletResponse.setContentType("application/json");
 
             // Write the JSON response to the output stream
-            servletResponse.getWriter().write(jsonResponse);
+            response.reset();
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
+            response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader(HEADER_TO_CHECK,headerValue);
+            response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, x-api-key");
+            response.getOutputStream().write(jsonResponse.getBytes());
+//            filterChain.doFilter(servletRequest, response);
+
         }
     }
     private boolean isValidJWTToken(String jwtToken) {
@@ -140,7 +141,7 @@ public class CustomHeaderFilter implements Filter {
             // Check if the current time is before the expiration time
             return expiration.after(new Date());
 
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
             // Log any potential exceptions or handle accordingly
             e.printStackTrace();
             return false;
