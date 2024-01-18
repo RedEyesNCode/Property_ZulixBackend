@@ -259,7 +259,7 @@ public class UserService {
             loginJwtResponse.setUser(checkUserLogin);
             loginJwtResponse.setJWT(generateJwtToken(checkUserLogin.getEmail()));
             loginJwtResponse.setMessage("Login Successfully");
-            loginJwtResponse.setStatus("200 CI USING GITHUB-MAVEN SCRIPT");
+            loginJwtResponse.setStatus("success");
 
             return ResponseEntity.ok(loginJwtResponse);
         } else {
@@ -282,11 +282,12 @@ public class UserService {
     }
 
     public ResponseEntity<?> checkUsername(HashMap<String, String> hashMap) {
-
+        String userId = hashMap.get("userId");
+        UserTable userTable = userTableRepo.getById(Long.valueOf(userId));
         if(userTableRepo.existsByUsername(hashMap.get("username"))){
             return BadResponseMessage("Username already exists !");
         }else {
-            return SuccessResponseMessage("Username available !");
+            return ResponseEntity.ok(new CustomStatusCodeModel("200",200,"User-name does not exist for given user Id",userTable));
         }
     }
 
@@ -298,7 +299,7 @@ public class UserService {
 
         if(userTableRepo.existsById(Long.valueOf(userId))){
             //delete all relationships
-            if(password.equals(userTableRepo.getById(Long.valueOf(userId)))){
+            if(password.equals(userTableRepo.getById(Long.valueOf(userId)).getPassword())){
                 userTableRepo.deleteById(Long.valueOf(userId));
                 return SuccessResponseMessage("User Deleted successfully");
 
